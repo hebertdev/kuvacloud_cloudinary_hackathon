@@ -3,6 +3,9 @@ import { useContext, useState, useEffect, Fragment } from "react";
 //services
 import { add_cloudinary_key } from "services/cloudinary";
 
+//hooks
+import useIsMobile from "hooks/useIsMobile";
+
 //contetx
 import UserContext from "contexts/UserContext";
 import AlertContext from "contexts/AlertContext";
@@ -66,6 +69,8 @@ export function ButtonCloudinary() {
 }
 
 function ButtonCloud({ cloudinarys, handleOpenModal }) {
+  const [responsive] = useState(useIsMobile());
+
   return (
     <>
       {cloudinarys.length === 0 ? (
@@ -74,7 +79,6 @@ function ButtonCloud({ cloudinarys, handleOpenModal }) {
           color="error"
           sx={{
             marginRight: "10px",
-            width: "150px",
           }}
           onClick={handleOpenModal}
           startIcon={<WarningAmberIcon />}
@@ -84,7 +88,7 @@ function ButtonCloud({ cloudinarys, handleOpenModal }) {
               textTransform: "capitalize",
             }}
           >
-            cloudinary
+            {responsive ? "cloud" : "cloudinary"}
           </Typography>
         </Button>
       ) : (
@@ -93,7 +97,6 @@ function ButtonCloud({ cloudinarys, handleOpenModal }) {
           onClick={handleOpenModal}
           sx={{
             marginRight: "10px",
-            width: "150px",
           }}
           startIcon={<CloudQueueIcon />}
         >
@@ -105,7 +108,13 @@ function ButtonCloud({ cloudinarys, handleOpenModal }) {
             {cloudinarys.map((item) => {
               if (item.checked) {
                 return (
-                  <Fragment key={item.cloud_name}> {item.cloud_name}</Fragment>
+                  <Fragment key={item.cloud_name}>
+                    {responsive ? (
+                      <>{item.cloud_name.slice(0, 3) + "..."}</>
+                    ) : (
+                      <>{item.cloud_name}</>
+                    )}{" "}
+                  </Fragment>
                 );
               } else {
                 return null;
@@ -150,7 +159,6 @@ function DialogWithCloudinarys({
     try {
       setLoading(true);
       const data = await add_cloudinary_key(crendentials);
-      console.log(data);
       alertSms(
         "Entorno de cloudinary vinculado correctamente",
         "success",
@@ -305,7 +313,6 @@ function DialogWithoutCloudinarys({
     try {
       setLoading(true);
       const data = await add_cloudinary_key(crendentials);
-      console.log(data);
       alertSms(
         "Entorno de cloudinary vinculado correctamente",
         "success",

@@ -73,7 +73,6 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
       compressedFormData.append("public_id", uploadedFileX.public_id);
       compressedFormData.append("quality", valueSlider);
       const compressed = await new_file_change(compressedFormData);
-      console.log(compressed);
       setModifiedUrl(compressed.compressed_image_details);
       alertSms("Se comprimió la imagen correctamente", "success", true);
 
@@ -108,7 +107,6 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
   function copyToClipboard() {
     const input = document.createElement("input");
     input.value = modifiedUrl.toString();
-    console.log(input.value);
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy");
@@ -253,7 +251,7 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
             {uploadedFile && (
               <Box>
                 Peso original: {(uploadedFile.bytes / 1024).toFixed(2)}Kb | Peso
-                comprimido: {(modifiedSize / 1024).toFixed(2)} |{" "}
+                comprimido: {(modifiedSize / 1024).toFixed(2)}Kb |{" "}
                 {(
                   ((uploadedFile.bytes - modifiedSize) / uploadedFile.bytes) *
                   100
@@ -264,7 +262,7 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
                   size="small"
                   onClick={() => downloadImage(modifiedUrl)}
                 >
-                  Descargar Imagen comprimida
+                  Descargar Imagen
                 </Button>
                 <IconButton onClick={copyToClipboard}>
                   <ContentCopyIcon />

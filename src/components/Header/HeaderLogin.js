@@ -10,6 +10,9 @@ import DarkModeContext from "contexts/DarkModeContext";
 //helpers
 import { setStatus, getStatus } from "helpers/header";
 
+//hooks
+import useIsMobile from "hooks/useIsMobile";
+
 //components
 import { MenuHeaderLogin } from "./MenuHeaderLogin";
 import { ButtonCloudinary } from "./ButtonCloudinary";
@@ -189,8 +192,8 @@ export function HeaderLogin() {
 
             <Box>
               <ButtonCloudinary />
-              <Button
-                startIcon={
+              {useIsMobile() ? (
+                <IconButton>
                   <Avatar
                     src={user?.profile?.avatar}
                     sx={{
@@ -198,11 +201,23 @@ export function HeaderLogin() {
                       height: "30px",
                     }}
                   />
-                }
-                endIcon={<ArrowDropDownIcon />}
-              >
-                MENU
-              </Button>
+                </IconButton>
+              ) : (
+                <Button
+                  startIcon={
+                    <Avatar
+                      src={user?.profile?.avatar}
+                      sx={{
+                        width: "30px",
+                        height: "30px",
+                      }}
+                    />
+                  }
+                  endIcon={<ArrowDropDownIcon />}
+                >
+                  MENU
+                </Button>
+              )}
             </Box>
           </Box>
         </Toolbar>

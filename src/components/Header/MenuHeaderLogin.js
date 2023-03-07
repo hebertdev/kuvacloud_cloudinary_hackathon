@@ -45,7 +45,9 @@ export function MenuHeaderLogin() {
                 justifyContent: "center",
               }}
             >
-              <ConstructionIcon />
+              <ConstructionIcon
+                color={`${router.asPath === "/" && "primary"}`}
+              />
             </ListItemIcon>
             <ListItemText
               primary={"Herramientas"}
@@ -97,7 +99,9 @@ export function MenuHeaderLogin() {
                 justifyContent: "center",
               }}
             >
-              <AutoAwesomeMosaicIcon />
+              <AutoAwesomeMosaicIcon
+                color={`${router.asPath === "/my-drive" && "primary"}`}
+              />
             </ListItemIcon>
             <ListItemText
               primary={"Mis cambios"}

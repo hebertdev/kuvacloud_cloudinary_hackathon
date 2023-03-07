@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 
 //next
 import LinkNext from "next/link";
@@ -8,6 +8,9 @@ import { setToken } from "helpers/auth";
 
 //servicios
 import { login } from "services/accounts";
+
+//context
+import AlertContext from "contexts/AlertContext";
 
 import {
   Avatar,
@@ -20,109 +23,49 @@ import {
   TextField,
   Toolbar,
   Typography,
-  styled,
 } from "@mui/material";
-
-import heroImg from "media/banner_white.png";
+import { LoadingButton } from "@mui/lab";
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
+import { Layout } from "components/pages/Accounts";
+
 export default function LoginPage() {
-  const Title = styled(Typography)(({ theme }) => ({
-    fontSize: "50px",
-    color: "white",
-    fontWeight: "bold",
-
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "35px",
-      marginTop: "100px",
-    },
-  }));
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "space-between",
-      }}
-    >
-      <Box
-        sx={{
-          width: "50%",
-          background: "#074fa8d1",
-          backgroundImage:
-            "url('https://cdn.wallpapersafari.com/27/47/GYHbrc.jpg')",
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          position: "relative",
-          ":before": {
-            content: "''",
-            position: "absolute",
-            background: "#074fa8d1",
-            width: "100%",
-            height: "100vh",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            width: "90%",
-            margin: "auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-          }}
-        >
-          <Box>
-            <img
-              src={heroImg.src}
-              alt="banner"
-              style={{
-                width: "80%",
-                objectFit: "contain",
-                margin: "auto",
-                display: "block",
-              }}
-            />
-            <Title
-              sx={{
-                fontSize: "20px",
-                textAlign: "center",
-              }}
-            >
-              Simplifica la gestión de tus cuentas de Cloudinary.
-            </Title>
-          </Box>
-        </Box>
-      </Box>
-
-      <Box sx={{ width: "50%" }}>
-        <SignIn />
-      </Box>
-    </Box>
+    <Layout>
+      <SignIn />
+    </Layout>
   );
 }
 
 function SignIn() {
+  const { alertSms } = useContext(AlertContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleEmailChange = (event) => setEmail(event.target.value);
   const handlePasswordChange = (event) => setPassword(event.target.value);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
     try {
+      setLoading(true);
       const data = await login(email, password);
       setToken(data.access);
       // Redirigir al usuario a la página de inicio después de iniciar sesión
+      alertSms("Bienvenido", "success", true);
       window.location.href = "/";
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      if (error?.response?.status === 400) {
+        alertSms("Credenciales incorrectas", "error", true);
+        setPassword("");
+        setEmail("");
+      } else {
+        alertSms("Problemas con el servidor", "error", true);
+      }
+      setLoading(false);
     }
   };
 
@@ -170,14 +113,26 @@ function SignIn() {
             value={password}
             onChange={handlePasswordChange}
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Iniciar sesión
-          </Button>
+          {!loading ? (
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Iniciar sesión
+            </Button>
+          ) : (
+            <LoadingButton
+              loading
+              variant="outlined"
+              fullWidth
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Submit
+            </LoadingButton>
+          )}
+
           <Grid container>
             <Grid item xs>
               <Link
