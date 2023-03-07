@@ -1,0 +1,34 @@
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+
+
+*::-webkit-scrollbar {
+  width: 7px; /* Tamaño del scroll en vertical */
+  height: 7px; /* Tamaño del scroll en horizontal */
+}
+
+*::-webkit-scrollbar-thumb {
+  background: grey;
+}
