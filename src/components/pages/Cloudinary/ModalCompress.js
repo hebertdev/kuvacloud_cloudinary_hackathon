@@ -1,5 +1,7 @@
-import { useState, useEffect, useContext } from "react";
-import { Cloudinary } from "@cloudinary/url-gen";
+import { useState, useContext } from "react";
+
+import axios from "axios";
+
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -11,7 +13,6 @@ import { new_file_change } from "services/cloudinary";
 //context
 import AlertContext from "contexts/AlertContext";
 
-//material UI
 import {
   Box,
   Typography,
@@ -26,65 +27,34 @@ import {
   IconButton,
 } from "@mui/material";
 
-import axios from "axios";
-
-import CompressOutlinedIcon from "@mui/icons-material/CompressOutlined";
-import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-
-const cld = new Cloudinary({
-  cloud: {
-    cloudName: "hebertdev1",
-  },
-});
-
-export function Compress({ preview, handleUploadClick, handleCloseModal }) {
+export function ModalCompress({ media }) {
   const { alertSms } = useContext(AlertContext);
-  const [value, setValue] = useState(0);
   const [valueSlider, setValueSlider] = useState(70);
   const [uploading, setUploading] = useState(false);
-  const [isUploaded, setIsUploaded] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
   const [modifiedUrl, setModifiedUrl] = useState(null);
   const [modifiedSize, setModifiedSize] = useState(null);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
 
   const handleChangeSlider = (e) => {
     setValueSlider(e.target.value);
   };
 
-  const handleUploadAndCompressImage = async () => {
-    if (uploading) return;
+  const handleCompressImage = async () => {
     try {
-      setUploading(true);
-      let uploadedFileX = uploadedFile;
-      if (!isUploaded) {
-        uploadedFileX = await handleUploadClick();
-        setUploadedFile(uploadedFileX);
-        setIsUploaded(true);
-      } else {
-        uploadedFileX = uploadedFile;
-      }
-
-      const compressedFormData = new FormData();
-      compressedFormData.append("public_id", uploadedFileX.public_id);
-      compressedFormData.append("quality", valueSlider);
-      const compressed = await new_file_change(compressedFormData);
+      let formData = new FormData();
+      formData.append("public_id", media.public_id);
+      formData.append("quality", valueSlider);
+      const compressed = await new_file_change(formData);
       setModifiedUrl(compressed.compressed_image_details);
-      alertSms("Se comprimió la imagen correctamente", "success", true);
-
       const modifiedResponse = await axios.head(
         compressed.compressed_image_details
       );
       const modifiedFileSize = modifiedResponse.headers["content-length"];
       setModifiedSize(modifiedFileSize);
       setUploading(false);
-    } catch (error) {
-      setUploading(false);
-      console.log(error);
+      alertSms("Se comprimió la imagen correctamente", "success", true);
+    } catch (e) {
+      console.log(e);
+      alertSms("Hubo un error al comprimir la imagen", "error", true);
     }
   };
 
@@ -104,50 +74,8 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
       });
   };
 
-  function copyToClipboard() {
-    const input = document.createElement("input");
-    input.value = modifiedUrl.toString();
-    document.body.appendChild(input);
-    input.select();
-    document.execCommand("copy");
-    document.body.removeChild(input);
-    alertSms("se copio la URL al portapeles", "success", true);
-  }
-
   return (
     <>
-      <DialogTitle>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="scrollable auto tabs example"
-          >
-            <Tab
-              label={
-                <Typography sx={{ display: "flex" }}>
-                  <CompressOutlinedIcon sx={{ mr: "5px" }} /> Comprimir
-                </Typography>
-              }
-            />
-            <Tab label="QUITAR FONDO" disabled />
-            <Tab label="RECORTAR IMAGEN" disabled />
-            <Tab label="AGREGAR FILTRO" disabled />
-          </Tabs>
-          <IconButton onClick={handleCloseModal}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-
       <DialogContent
         sx={{
           height: "100vh",
@@ -187,7 +115,7 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
                   }}
                   itemOne={
                     <ReactCompareSliderImage
-                      src={uploadedFile.secure_url}
+                      src={media.secure_url}
                       alt="Original Image"
                       style={{
                         display: "block",
@@ -221,7 +149,7 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
                 }}
               >
                 <img
-                  src={preview}
+                  src={media.secure_url}
                   alt="PREVIEW IMAGE"
                   style={{
                     display: "block",
@@ -236,7 +164,6 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
           </>
         )}
       </DialogContent>
-
       <DialogActions>
         <Box
           sx={{
@@ -250,14 +177,13 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
               display: "block",
             }}
           >
-            {uploadedFile && (
+            {modifiedUrl && (
               <Box>
-                Peso original: {(uploadedFile.bytes / 1024).toFixed(2)}Kb | Peso
+                Peso original: {(media.bytes / 1024).toFixed(2)}Kb | Peso
                 comprimido: {(modifiedSize / 1024).toFixed(2)}Kb |{" "}
-                {(
-                  ((uploadedFile.bytes - modifiedSize) / uploadedFile.bytes) *
-                  100
-                ).toFixed(2)}
+                {(((media.bytes - modifiedSize) / media.bytes) * 100).toFixed(
+                  2
+                )}
                 % |{" "}
                 <Button
                   variant="outlined"
@@ -266,9 +192,6 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
                 >
                   Descargar Imagen
                 </Button>
-                <IconButton onClick={copyToClipboard}>
-                  <ContentCopyIcon />
-                </IconButton>
               </Box>
             )}
             <Slider
@@ -286,9 +209,8 @@ export function Compress({ preview, handleUploadClick, handleCloseModal }) {
           </Box>
         </Box>
       </DialogActions>
-
       <DialogActions>
-        <Button onClick={handleUploadAndCompressImage}>comprimir</Button>
+        <Button onClick={handleCompressImage}>comprimir</Button>
       </DialogActions>
     </>
   );

@@ -256,7 +256,7 @@ function DialogWithCloudinarys({
                 onChange={handleChangeCredentials}
               />
               <Button type="submit" variant="outlined">
-                Guardar
+                {loading ? "Guardando..." : "Guardar"}
               </Button>
               <Button
                 type="button"
@@ -320,6 +320,11 @@ function DialogWithoutCloudinarys({
       );
       setCloudinarys([...cloudinarys, data]);
       setLoading(false);
+      setCredentials({
+        cloud_name: "",
+        api_key: "",
+        api_secret: "",
+      });
     } catch (error) {
       setLoading(false);
       setCredentials({
@@ -438,7 +443,7 @@ function DialogWithoutCloudinarys({
             onChange={handleChangeCredentials}
           />
           <Button type="submit" variant="outlined">
-            Guardar
+            {loading ? "Guardando..." : "Guardar"}
           </Button>
         </Stack>
       </DialogContent>
